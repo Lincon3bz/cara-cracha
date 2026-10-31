@@ -13,5 +13,11 @@
         <li>Nenhum evento ainda.</li>
         {{end}}
     </ul>
+    <h2>Novo evento</h2>
+    <form method="post" action="/eventos">
+        <label>Nome<input name="nome"></label>
+        <label>Data<input name="data"></label>
+        <button>Criar</button>
+    </form>
 </body>
 </html>
