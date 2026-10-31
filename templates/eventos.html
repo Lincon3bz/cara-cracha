@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <title>cara-crachá</title>
+</head>
+<body>
+    <h1>Eventos</h1>
+    <ul>
+        {{range .}}
+        <li>{{.Nome}}({{.Data}})</li>
+        {{else}}
+        <li>Nenhum evento ainda.</li>
+        {{end}}
+    </ul>
+</body>
+</html>
