@@ -20,7 +20,6 @@ func listarEventos(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println("_-* I N I C I O U   O   S I S T E M A *-_")
 	fmt.Println("Servidor ligado! http://localhost:8080")
 	err := http.ListenAndServe(":8080", rotas())
 	fmt.Println("Server parou:", err)
