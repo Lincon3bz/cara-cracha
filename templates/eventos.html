@@ -3,20 +3,28 @@
 <head>
     <meta charset="utf-8">
     <title>cara-crachá</title>
+    <style>.erro { color: #b00020; }</style>
 </head>
 <body>
     <h1>Eventos</h1>
     <ul>
-        {{range .}}
-        <li>{{.Nome}}({{.Data}})</li>
+        {{range .Eventos}}
+        <li>{{.Nome}} ({{.Data}})</li>
         {{else}}
         <li>Nenhum evento ainda.</li>
         {{end}}
     </ul>
+
     <h2>Novo evento</h2>
     <form method="post" action="/eventos">
-        <label>Nome<input name="nome"></label>
-        <label>Data<input name="data"></label>
+        <p>
+            <label>Nome <input name="nome" value="{{.Form.Nome}}"></label>
+            {{with .Form.Erros.nome}}<span class="erro">{{.}}</span>{{end}}
+        </p>
+        <p>
+            <label>Data <input name="data" value="{{.Form.Data}}" placeholder="DD/MM/AAAA"></label>
+            {{with .Form.Erros.data}}<span class="erro">{{.}}</span>{{end}}
+        </p>
         <button>Criar</button>
     </form>
 </body>
