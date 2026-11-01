@@ -3,11 +3,12 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
-	"testing"
 	"net/url"
 	"strings"
 	"sync"
+	"testing"
 )
+
 func TestHealth(t *testing.T) {
 	req := httptest.NewRequest("GET", "/health", nil)
 	rec := httptest.NewRecorder()
@@ -24,21 +25,21 @@ func TestCriarEventosAoMesmoTempo(t *testing.T) {
 	antes := len(eventos)
 	const total = 1000
 
-	var wg. sync.WaitGroup
-	for i:= ; i<total;i++{
+	var wg sync.WaitGroup
+	for range total {
 		wg.Add(1)
-		go func(){
+		go func() {
 			defer wg.Done()
-			form := url.Values{"nome": {"Festa_teste"},"data":{"01/01/2020"}}
-			req := http.NewRequest("POST","/eventos",strings.NewReader(form.Encode()))
-			req.Header.Set("Content-Type","application/x-www-form-urlencoded")
+			form := url.Values{"nome": {"Festa_teste"}, "data": {"01/01/2020"}}
+			req := httptest.NewRequest("POST", "/eventos", strings.NewReader(form.Encode()))
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			rec := httptest.NewRecorder()
-			rotas().ServeHTTP(rec,req)
+			rotas().ServeHTTP(rec, req)
 		}()
 	}
 	wg.Wait()
-	novos := len(eventos)-antes
-	if novos != total{
-		t.Errorf("esperava %d eventos novos, vieram %d",total,novos)
+	novos := len(eventos) - antes
+	if novos != total {
+		t.Errorf("esperava %d eventos novos, vieram %d", total, novos)
 	}
 }
