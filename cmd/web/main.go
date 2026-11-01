@@ -45,14 +45,15 @@ func mostrarEventos(w http.ResponseWriter, status int, form formEvento) { //entr
 func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e validação para criação de evento
 	form := formEvento{
 		Nome:  strings.TrimSpace(r.FormValue("nome")),
-		Data:  r.FormValue("data"),
+		Data:  strings.TrimSpace(r.FormValue("data")),
 		Erros: map[string]string{},
 	}
 	if form.Nome == "" {
 		form.Erros["nome"] = "Faltou o nome do evento "
 	}
-	if form.Data == "" { //tratar no futuro pra aceitar somente números (colocar '/' sozinho)
-		form.Erros["Data"] = "Informe a data" //tratar pra no futuro deixar enviar o formulário (checkbox "ainda não tenho data")
+	if form.Data == "" { //TAREFA: tratar no futuro pra aceitar somente números (colocar '/' sozinho)
+		form.Erros["data"] = "Informe a data" //TAREFA:tratar pra no futuro deixar enviar o formulário (checkbox "ainda não tenho data")
+
 	} else {
 		_, err := time.Parse("02/01/2006", form.Data)
 		if err != nil {
@@ -86,6 +87,6 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fmt.Println("Servidor ligado! http://localhost:8080")
 	err := http.ListenAndServe(":8080", rotas())
-	fmt.Println("Server parou:", err)
+	fmt.Println("Servidor parou:", err)
 
 }
