@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"slices"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -28,6 +30,7 @@ var eventos = []Evento{
 	{Nome: "Churrasco dos primos", Data: "31/10/2026"},
 	{Nome: "Aniversário do tatu", Data: "10/09/1990"},
 }
+var travaEventos sync.Mutex
 
 func mostrarEventos(w http.ResponseWriter, status int, form formEvento) { //entrega o html da página /eventos
 	tmpl, err := template.ParseFiles("templates/eventos.html")
@@ -35,8 +38,11 @@ func mostrarEventos(w http.ResponseWriter, status int, form formEvento) { //entr
 		http.Error(w, "Erro ao carregar a página", http.StatusInternalServerError)
 		return
 	}
+	travaEventos.Lock()
+	foto := slices.Clone(eventos)
+	travaEventos.Unlock()
 	w.WriteHeader(status)
-	err = tmpl.Execute(w, paginaEventos{Eventos: eventos, Form: form})
+	err = tmpl.Execute(w, paginaEventos{Eventos: foto, Form: form})
 	if err != nil {
 		fmt.Println("erro ao montar a página:", err)
 	}
@@ -64,7 +70,9 @@ func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e valid
 		mostrarEventos(w, http.StatusUnprocessableEntity, form)
 		return
 	}
+	travaEventos.Lock()
 	eventos = append(eventos, Evento{Nome: form.Nome, Data: form.Data})
+	travaEventos.Unlock()
 	http.Redirect(w, r, "/eventos", http.StatusSeeOther)
 }
 
