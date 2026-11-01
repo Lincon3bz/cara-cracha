@@ -51,8 +51,8 @@ func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e valid
 	if form.Nome == "" {
 		form.Erros["nome"] = "Faltou o nome do evento "
 	}
-	if form.Data == "" { //TAREFA: tratar no futuro pra aceitar somente números (colocar '/' sozinho)
-		form.Erros["data"] = "Informe a data" //TAREFA:tratar pra no futuro deixar enviar o formulário (checkbox "ainda não tenho data")
+	if form.Data == "" { //TODO: tratar no futuro pra aceitar somente números (colocar '/' sozinho)
+		form.Erros["data"] = "Informe a data" //TODO:tratar pra no futuro deixar enviar o formulário (checkbox "ainda não tenho data")
 
 	} else {
 		_, err := time.Parse("02/01/2006", form.Data)
