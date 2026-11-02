@@ -26,7 +26,6 @@ func (m *repositorioMemoria) Listar() []Evento {
 	m.trava.Lock()
 	defer m.trava.Unlock()
 	return slices.Clone(m.eventos)
-
 }
 
 var _ RepositorioEventos = (*repositorioMemoria)(nil)
