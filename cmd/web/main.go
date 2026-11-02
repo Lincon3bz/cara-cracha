@@ -63,7 +63,7 @@ func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e valid
 	} else {
 		_, err := time.Parse("02/01/2006", form.Data)
 		if err != nil {
-			form.Erros["data"] = "Data válida e no formato DD/MM/AAAA"
+			form.Erros["data"] = "Informe data válida e no formato DD/MM/AAAA"
 		}
 	}
 	if len(form.Erros) > 0 {
