@@ -18,14 +18,15 @@ type repositorioMemoria struct {
 func (m *repositorioMemoria) Adicionar(e Evento) error {
 	m.trava.Lock()
 	defer m.trava.Unlock()
-	eventos = append(eventos, Evento{Nome: form.Nome, Data: form.Data})
-
+	eventos = append(m.eventos, Evento{Nome: e.Nome, Data: e.Data})
+	return nil
 }
 
 func (m *repositorioMemoria) Listar() []Evento {
 	m.trava.Lock()
 	defer m.trava.Unlock()
-	foto := slices.Clone(eventos)
+	return slices.Clone(eventos)
+
 }
 
 var _ RepositorioEventos = (*repositorioMemoria)(nil)
