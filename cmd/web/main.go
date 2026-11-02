@@ -65,6 +65,7 @@ func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e valid
 	err := repo.Adicionar(Evento{Nome: form.Nome, Data: form.Data})
 	if err != nil {
 		http.Error(w, "Erro ao registrar evento", http.StatusInternalServerError)
+		return
 	}
 	http.Redirect(w, r, "/eventos", http.StatusSeeOther)
 }
