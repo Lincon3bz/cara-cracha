@@ -18,14 +18,14 @@ type repositorioMemoria struct {
 func (m *repositorioMemoria) Adicionar(e Evento) error {
 	m.trava.Lock()
 	defer m.trava.Unlock()
-	eventos = append(m.eventos, Evento{Nome: e.Nome, Data: e.Data})
+	m.eventos = append(m.eventos, e)
 	return nil
 }
 
 func (m *repositorioMemoria) Listar() []Evento {
 	m.trava.Lock()
 	defer m.trava.Unlock()
-	return slices.Clone(eventos)
+	return slices.Clone(m.eventos)
 
 }
 
