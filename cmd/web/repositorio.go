@@ -19,13 +19,26 @@ type repositorioMemoria struct {
 	eventos []Evento
 }
 
+func (m *repositorioMemoria) Adicionar(e Evento) error {
+	m.trava.Lock()
+	defer m.trava.Unlock()
+	m.eventos = append(m.eventos, e)
+	return nil
+}
+
+func (m *repositorioMemoria) Listar() []Evento {
+	m.trava.Lock()
+	defer m.trava.Unlock()
+	return slices.Clone(m.eventos)
+}
+
 type repositorioArquivo struct {
 	trava   sync.Mutex
 	caminho string
 	eventos []Evento
 }
 
-// ler ou criar arquivo
+// abre o repositório lendo o arquivo, se existir
 func novoRepositorioArquivo(caminho string) (*repositorioArquivo, error) {
 	arq := &repositorioArquivo{caminho: caminho}
 
@@ -59,19 +72,6 @@ func (arq *repositorioArquivo) Listar() []Evento {
 func (arq *repositorioArquivo) salvar() error {
 	// grava todos os eventos no arquivo (quem chama já está com a trava)
 	return nil
-}
-
-func (m *repositorioMemoria) Adicionar(e Evento) error {
-	m.trava.Lock()
-	defer m.trava.Unlock()
-	m.eventos = append(m.eventos, e)
-	return nil
-}
-
-func (m *repositorioMemoria) Listar() []Evento {
-	m.trava.Lock()
-	defer m.trava.Unlock()
-	return slices.Clone(m.eventos)
 }
 
 var _ RepositorioEventos = (*repositorioMemoria)(nil)
