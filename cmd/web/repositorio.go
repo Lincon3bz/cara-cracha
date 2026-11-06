@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"slices"
 	"sync"
 )
@@ -58,11 +59,6 @@ func novoRepositorioArquivo(caminho string) (*repositorioArquivo, error) {
 	return arq, nil
 }
 
-func (arq *repositorioArquivo) Adicionar(e Evento) error {
-	// travar, append, salvar; se salvar falhar, desfazer o append e devolver o erro
-	return nil
-}
-
 func (arq *repositorioArquivo) Listar() []Evento {
 	arq.trava.Lock()
 	defer arq.trava.Unlock()
@@ -70,10 +66,31 @@ func (arq *repositorioArquivo) Listar() []Evento {
 }
 
 func (arq *repositorioArquivo) salvar() error {
-	// grava todos os eventos no arquivo (quem chama já está com a trava)
+	conteudo, err := json.MarshalIndent(arq.eventos, "", "    ")
+	if err != nil {
+		return nil
+	}
+
+	err = os.MkdirAll(filepath.Dir(arq.caminho), 0o755)
+	if err != nil {
+		return nil
+	}
+
+	return os.WriteFile(arq.caminho, conteudo, 0o644)
+}
+
+func (arq *repositorioArquivo) Adicionar(e Evento) error {
+	arq.trava.Lock()
+	defer arq.trava.Unlock()
+
+	arq.eventos = append(arq.eventos, e)
+	err := arq.salvar()
+	if err != nil {
+		arq.eventos = arq.eventos[:len(arq.eventos)-1]
+		return err
+	}
 	return nil
 }
 
 var _ RepositorioEventos = (*repositorioMemoria)(nil)
-
-//var _ RepositorioEventos = (*repositorioArquivo)(nil)
+var _ RepositorioEventos = (*repositorioArquivo)(nil)

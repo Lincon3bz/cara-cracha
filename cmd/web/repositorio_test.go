@@ -27,7 +27,6 @@ func TestRepositorioArquivoSobreviveAoReinicio(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	// "reinicia o servidor": um repositório novo, lendo o mesmo arquivo
 	segundo, err := novoRepositorioArquivo(caminho)
 	if err != nil {
