@@ -15,6 +15,16 @@ type RepositorioEventos interface {
 	Listar() []Evento
 }
 
+func proximoID(eventos []Evento) int {
+	maior := 0
+	for _, e := range eventos {
+		if e.ID > maior {
+			maior = e.ID
+		}
+	}
+	return maior + 1
+}
+
 type repositorioMemoria struct {
 	trava   sync.Mutex
 	eventos []Evento
@@ -25,6 +35,7 @@ var _ RepositorioEventos = (*repositorioMemoria)(nil) //compilador confere se st
 func (m *repositorioMemoria) Adicionar(e Evento) error {
 	m.trava.Lock()
 	defer m.trava.Unlock()
+	e.ID = proximoID(m.eventos)
 	m.eventos = append(m.eventos, e)
 	return nil
 }
@@ -87,6 +98,7 @@ func (arq *repositorioArquivo) Adicionar(e Evento) error {
 	arq.trava.Lock()
 	defer arq.trava.Unlock()
 
+	e.ID = proximoID(arq.eventos)
 	arq.eventos = append(arq.eventos, e)
 	err := arq.salvar()
 	if err != nil {

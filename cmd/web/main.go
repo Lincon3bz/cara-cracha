@@ -10,6 +10,7 @@ import (
 )
 
 type Evento struct {
+	ID   int
 	Nome string
 	Data string
 }

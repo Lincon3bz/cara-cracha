@@ -65,3 +65,29 @@ func TestRepositorioArquivoLeEventosSalvos(t *testing.T) {
 		t.Errorf("esperava os 2 eventos do arquivo, vieram %v", eventos)
 	}
 }
+
+func TestRepositorioMemoriaGeraIDs(t *testing.T) {
+	repo := &repositorioMemoria{}
+	repo.Adicionar(Evento{Nome: "Churrasco dos primos", Data: "31/10/2026"})
+	repo.Adicionar(Evento{Nome: "Natal da família", Data: "25/12/2026"})
+
+	eventos := repo.Listar()
+	if eventos[0].ID != 1 || eventos[1].ID != 2 {
+		t.Errorf("esperava IDs 1 e 2, vieram %d e %d", eventos[0].ID, eventos[1].ID)
+	}
+}
+
+func TestRepositorioArquivoIDsContinuamDepoisDoReinicio(t *testing.T) {
+	caminho := filepath.Join(t.TempDir(), "eventos.json")
+
+	primeiro, _ := novoRepositorioArquivo(caminho)
+	primeiro.Adicionar(Evento{Nome: "Churrasco dos primos", Data: "31/10/2026"}) // ganha o ID 1
+
+	segundo, _ := novoRepositorioArquivo(caminho) // "reinicia o servidor"
+	segundo.Adicionar(Evento{Nome: "Natal da família", Data: "25/12/2026"})
+
+	eventos := segundo.Listar()
+	if eventos[1].ID != 2 {
+		t.Errorf("depois do reinício, esperava o ID 2, veio %d", eventos[1].ID)
+	}
+}
