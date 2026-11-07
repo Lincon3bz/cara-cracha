@@ -33,11 +33,15 @@ func (m *repositorioMemoria) Listar() []Evento {
 	return slices.Clone(m.eventos)
 }
 
+var _ RepositorioEventos = (*repositorioMemoria)(nil) //compilador confere se struct satisfaz interface
+
 type repositorioArquivo struct {
 	trava   sync.Mutex
 	caminho string
 	eventos []Evento
 }
+
+var _ RepositorioEventos = (*repositorioArquivo)(nil) //compilador confere se struct satisfaz interface
 
 // abre o repositório lendo o arquivo, se existir
 func novoRepositorioArquivo(caminho string) (*repositorioArquivo, error) {
@@ -91,6 +95,3 @@ func (arq *repositorioArquivo) Adicionar(e Evento) error {
 	}
 	return nil
 }
-
-var _ RepositorioEventos = (*repositorioMemoria)(nil)
-var _ RepositorioEventos = (*repositorioArquivo)(nil)
