@@ -22,7 +22,7 @@ func TestHealth(t *testing.T) {
 }
 
 func TestCriarEventosAoMesmoTempo(t *testing.T) {
-	antes := len(eventos)
+	antes := len(repo.Listar())
 	const total = 1000
 
 	var wg sync.WaitGroup
@@ -38,7 +38,7 @@ func TestCriarEventosAoMesmoTempo(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	novos := len(eventos) - antes
+	novos := len(repo.Listar()) - antes
 	if novos != total {
 		t.Errorf("esperava %d eventos novos, vieram %d", total, novos)
 	}
