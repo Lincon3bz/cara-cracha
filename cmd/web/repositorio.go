@@ -20,6 +20,8 @@ type repositorioMemoria struct {
 	eventos []Evento
 }
 
+var _ RepositorioEventos = (*repositorioMemoria)(nil) //compilador confere se struct satisfaz interface
+
 func (m *repositorioMemoria) Adicionar(e Evento) error {
 	m.trava.Lock()
 	defer m.trava.Unlock()
@@ -32,8 +34,6 @@ func (m *repositorioMemoria) Listar() []Evento {
 	defer m.trava.Unlock()
 	return slices.Clone(m.eventos)
 }
-
-var _ RepositorioEventos = (*repositorioMemoria)(nil) //compilador confere se struct satisfaz interface
 
 type repositorioArquivo struct {
 	trava   sync.Mutex
