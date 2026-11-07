@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -87,8 +88,14 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	arq, err := novoRepositorioArquivo("dados/eventos.json")
+	if err != nil {
+		log.Fatal("erro ao ler os dados: ", err)
+	}
+	repo = arq
+
 	fmt.Println("Servidor ligado! http://localhost:8080")
-	err := http.ListenAndServe(":8080", rotas())
+	err = http.ListenAndServe(":8080", rotas())
 	fmt.Println("Servidor parou:", err)
 
 }
