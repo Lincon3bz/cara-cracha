@@ -28,15 +28,21 @@ type paginaEventos struct {
 
 var repo RepositorioEventos = &repositorioMemoria{}
 
-func mostrarEventos(w http.ResponseWriter, status int, form formEvento) { //entrega o html da página /eventos
+func mostrarEventos(w http.ResponseWriter, r *http.Request, status int, form formEvento) { //entrega o html da página /eventos
 	tmpl, err := template.ParseFiles("templates/eventos.html")
 	if err != nil {
 		http.Error(w, "Erro ao carregar a página", http.StatusInternalServerError)
 		return
 	}
 
+	eventos, err := repo.Listar(r.Context())
+	if err != nil {
+		http.Error(w, "Erro ao carregar eventos", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(status)
-	err = tmpl.Execute(w, paginaEventos{Eventos: repo.Listar(), Form: form})
+	err = tmpl.Execute(w, paginaEventos{Eventos: eventos, Form: form})
 	if err != nil {
 		fmt.Println("erro ao montar a página:", err)
 	}
@@ -61,10 +67,10 @@ func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e valid
 		}
 	}
 	if len(form.Erros) > 0 {
-		mostrarEventos(w, http.StatusUnprocessableEntity, form)
+		mostrarEventos(w, r, http.StatusUnprocessableEntity, form)
 		return
 	}
-	err := repo.Adicionar(Evento{Nome: form.Nome, Data: form.Data})
+	err := repo.Adicionar(r.Context(), Evento{Nome: form.Nome, Data: form.Data})
 	if err != nil {
 		http.Error(w, "Erro ao registrar evento", http.StatusInternalServerError)
 		return
@@ -73,7 +79,7 @@ func criarEvento(w http.ResponseWriter, r *http.Request) { //formulário e valid
 }
 
 func listarEventos(w http.ResponseWriter, r *http.Request) {
-	mostrarEventos(w, http.StatusOK, formEvento{})
+	mostrarEventos(w, r, http.StatusOK, formEvento{})
 }
 
 func rotas() http.Handler { //lista as possíveis rotas que o mux entrega
