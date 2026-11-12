@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -32,6 +31,10 @@ func (p *repositorioPostgres) Listar(ctx context.Context) ([]Evento, error) {
 	return eventos, linhas.Err()
 }
 
-func (p *repositorioPostgres) Adicionar(_ context.Context, _ Evento) error {
-	return errors.New("adicionar no postgres ainda não foi implementado")
+func (p *repositorioPostgres) Adicionar(ctx context.Context, e Evento) error {
+	_, err := p.pool.Exec(ctx,
+		"INSERT INTO eventos (nome,data) VALUES ($1, $2)",
+		e.Nome, e.Data,
+	)
+	return err
 }
