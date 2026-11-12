@@ -100,12 +100,6 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//arq, err := novoRepositorioArquivo("dados/eventos.json")
-	//if err != nil {
-	//	log.Fatal("erro ao ler os dados: ", err)
-	//}
-	//repo = arq
-
 	_ = godotenv.Load()
 	url := os.Getenv("DATABASE_URL")
 	if url == "" {
@@ -114,7 +108,7 @@ func main() {
 
 	pool, err := pgxpool.New(context.Background(), url)
 	if err != nil {
-		log.Fatal("DATABASE_URL inválida", err)
+		log.Fatal("DATABASE_URL inválida: ", err)
 	}
 	defer pool.Close()
 
