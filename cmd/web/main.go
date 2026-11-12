@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Lincon3bz/cara-cracha/templates"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -32,14 +33,9 @@ type paginaEventos struct {
 }
 
 var repo RepositorioEventos = &repositorioMemoria{}
+var tmplEventos = template.Must(template.ParseFS(templates.Arquivos, "eventos.html"))
 
 func mostrarEventos(w http.ResponseWriter, r *http.Request, status int, form formEvento) { //entrega o html da página /eventos
-	tmpl, err := template.ParseFiles("templates/eventos.html")
-	if err != nil {
-		http.Error(w, "Erro ao carregar a página", http.StatusInternalServerError)
-		return
-	}
-
 	eventos, err := repo.Listar(r.Context())
 	if err != nil {
 		http.Error(w, "Erro ao carregar eventos", http.StatusInternalServerError)
@@ -47,7 +43,7 @@ func mostrarEventos(w http.ResponseWriter, r *http.Request, status int, form for
 	}
 
 	w.WriteHeader(status)
-	err = tmpl.Execute(w, paginaEventos{Eventos: eventos, Form: form})
+	err = tmplEventos.Execute(w, paginaEventos{Eventos: eventos, Form: form})
 	if err != nil {
 		fmt.Println("erro ao montar a página:", err)
 	}
@@ -118,8 +114,12 @@ func main() {
 	}
 	repo = &repositorioPostgres{pool: pool}
 
-	fmt.Println("Servidor ligado! http://localhost:8080")
-	err = http.ListenAndServe(":8080", rotas())
+	porta := os.Getenv("PORT")
+	if porta == "" {
+		porta = "8080"
+	}
+	fmt.Println("Servidor ligado! http://localhost:" + porta)
+	err = http.ListenAndServe(":"+porta, rotas())
 	fmt.Println("Servidor parou:", err)
 
 }
