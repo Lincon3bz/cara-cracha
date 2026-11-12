@@ -9,7 +9,7 @@
     <h1>Eventos</h1>
     <ul>
         {{range .Eventos}}
-        <li>{{.Nome}} ({{.Data}})</li>
+        <li>#{{.ID}} {{.Nome}} ({{.Data}})</li>
         {{else}}
         <li>Nenhum evento ainda.</li>
         {{end}}

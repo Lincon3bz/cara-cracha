@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io/fs"
@@ -11,8 +12,18 @@ import (
 )
 
 type RepositorioEventos interface {
-	Adicionar(e Evento) error
-	Listar() []Evento
+	Adicionar(ctx context.Context, e Evento) error
+	Listar(ctx context.Context) ([]Evento, error)
+}
+
+func proximoID(eventos []Evento) int {
+	maior := 0
+	for _, e := range eventos {
+		if e.ID > maior {
+			maior = e.ID
+		}
+	}
+	return maior + 1
 }
 
 type repositorioMemoria struct {
@@ -22,17 +33,18 @@ type repositorioMemoria struct {
 
 var _ RepositorioEventos = (*repositorioMemoria)(nil) //compilador confere se struct satisfaz interface
 
-func (m *repositorioMemoria) Adicionar(e Evento) error {
+func (m *repositorioMemoria) Adicionar(_ context.Context, e Evento) error {
 	m.trava.Lock()
 	defer m.trava.Unlock()
+	e.ID = proximoID(m.eventos)
 	m.eventos = append(m.eventos, e)
 	return nil
 }
 
-func (m *repositorioMemoria) Listar() []Evento {
+func (m *repositorioMemoria) Listar(context.Context) ([]Evento, error) {
 	m.trava.Lock()
 	defer m.trava.Unlock()
-	return slices.Clone(m.eventos)
+	return slices.Clone(m.eventos), nil
 }
 
 type repositorioArquivo struct {
@@ -63,10 +75,10 @@ func novoRepositorioArquivo(caminho string) (*repositorioArquivo, error) {
 	return arq, nil
 }
 
-func (arq *repositorioArquivo) Listar() []Evento {
+func (arq *repositorioArquivo) Listar(_ context.Context) ([]Evento, error) {
 	arq.trava.Lock()
 	defer arq.trava.Unlock()
-	return slices.Clone(arq.eventos)
+	return slices.Clone(arq.eventos), nil
 }
 
 func (arq *repositorioArquivo) salvar() error {
@@ -83,10 +95,11 @@ func (arq *repositorioArquivo) salvar() error {
 	return os.WriteFile(arq.caminho, conteudo, 0o644)
 }
 
-func (arq *repositorioArquivo) Adicionar(e Evento) error {
+func (arq *repositorioArquivo) Adicionar(_ context.Context, e Evento) error {
 	arq.trava.Lock()
 	defer arq.trava.Unlock()
 
+	e.ID = proximoID(arq.eventos)
 	arq.eventos = append(arq.eventos, e)
 	err := arq.salvar()
 	if err != nil {
