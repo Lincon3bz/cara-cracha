@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 )
 
 type Evento struct {
@@ -95,11 +100,29 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	arq, err := novoRepositorioArquivo("dados/eventos.json")
-	if err != nil {
-		log.Fatal("erro ao ler os dados: ", err)
+	//arq, err := novoRepositorioArquivo("dados/eventos.json")
+	//if err != nil {
+	//	log.Fatal("erro ao ler os dados: ", err)
+	//}
+	//repo = arq
+
+	_ = godotenv.Load()
+	url := os.Getenv("DATABASE_URL")
+	if url == "" {
+		log.Fatal("defina DATABASE_URL no arquivo .env")
 	}
-	repo = arq
+
+	pool, err := pgxpool.New(context.Background(), url)
+	if err != nil {
+		log.Fatal("DATABASE_URL inválida", err)
+	}
+	defer pool.Close()
+
+	err = pool.Ping(context.Background())
+	if err != nil {
+		log.Fatal("não foi possível conectar DB: ", err)
+	}
+	repo = &repositorioPostgres{pool: pool}
 
 	fmt.Println("Servidor ligado! http://localhost:8080")
 	err = http.ListenAndServe(":8080", rotas())
