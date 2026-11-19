@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,9 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Lincon3bz/cara-cracha/migrations"
 	"github.com/Lincon3bz/cara-cracha/templates"
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 )
 
 type Evento struct {
@@ -99,7 +103,7 @@ func main() {
 	_ = godotenv.Load()
 	url := os.Getenv("DATABASE_URL")
 	if url == "" {
-		log.Fatal("defina DATABASE_URL no arquivo .env")
+		log.Fatal("defina a variável de ambiente DATABASE_URL")
 	}
 
 	pool, err := pgxpool.New(context.Background(), url)
@@ -112,6 +116,10 @@ func main() {
 	if err != nil {
 		log.Fatal("não foi possível conectar DB: ", err)
 	}
+	err = rodarMigrations(url)
+	if err != nil {
+		log.Fatal("não foi possível rodar migrations: ", err)
+	}
 	repo = &repositorioPostgres{pool: pool}
 
 	porta := os.Getenv("PORT")
@@ -121,5 +129,21 @@ func main() {
 	fmt.Println("Servidor ligado! http://localhost:" + porta)
 	err = http.ListenAndServe(":"+porta, rotas())
 	fmt.Println("Servidor parou:", err)
+
+}
+
+func rodarMigrations(url string) error {
+	db, err := sql.Open("pgx", url)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	goose.SetBaseFS(migrations.Arquivos)
+	err = goose.SetDialect("postgres")
+	if err != nil {
+		return err
+	}
+	return goose.Up(db, ".")
 
 }
