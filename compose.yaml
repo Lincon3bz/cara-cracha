@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:18                      
+    environment:
+      POSTGRES_USER: caracracha              
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} 
+      POSTGRES_DB: caracracha                
+    volumes:
+      - dados_db:/var/lib/postgresql         
+    healthcheck:                             
+      test: ["CMD-SHELL", "pg_isready -U caracracha -d caracracha"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped                  
+
+  app:
+    build: .                                 
+    environment:
+      DATABASE_URL: postgres://caracracha:${POSTGRES_PASSWORD}@db:5432/caracracha
+      PORT: "8080"
+    depends_on:
+      db:
+        condition: service_healthy           
+    ports:
+      - "127.0.0.1:8080:8080"                
+    restart: unless-stopped
+
+volumes:
+  dados_db:                                  
